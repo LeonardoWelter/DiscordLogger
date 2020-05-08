@@ -1,0 +1,5 @@
+{
+  "prefix": ";",
+  "token": "Token do bot aqui",
+  "channel" : "id do canal onde os logs serão postados"
+}

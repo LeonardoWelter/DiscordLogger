@@ -1,0 +1,23 @@
+{
+  "name": "discordlogger",
+  "version": "1.0.0",
+  "description": "A discord logger bot!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/LeonardoWelter/DiscordLogger"
+  },
+  "keywords": [
+    "discord",
+    "logger",
+    "bot"
+  ],
+  "author": "Leonardo Welter",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.2.0"
+  }
+}
