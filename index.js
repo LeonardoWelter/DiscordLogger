@@ -56,6 +56,20 @@ client.on('message', message => {
     return canal.send(`[++ CHAT] ${date.toLocaleString()} - [${message.channel}] ${message.author.tag} : ${message.cleanContent}`);
 });
 
+client.on('message', message => {
+    if (message.author.bot) return;
+
+    let date = new Date();
+    let embedAdd = new Discord.MessageEmbed()
+        .setColor('#17fc03')
+        .setDescription(`Mensagem enviada no canal [#${message.channel.name}]`)
+        .addField(`${message.author.tag} escreveu: `, message.cleanContent)
+        .setFooter(date.toLocaleString() + ' - DiscordLogger');
+
+
+    return canal.send(embedAdd);
+});
+
 client.on('messageDelete', message => {
     if (message.author.bot) return;
 
@@ -64,12 +78,19 @@ client.on('messageDelete', message => {
     return canal.send(`[-- CHAT] ${date.toLocaleString()} - [${message.channel}] ${message.author.tag} : ${message.cleanContent} | ${message.createdAt.toLocaleString()}`);
 });
 
-client.on('messageUpdate', (oldMessage, newMessage) => {
-    if (oldMessage.author.bot) return;
+client.on('messageDelete', message => {
+    if (message.author.bot) return;
 
     let date = new Date();
+    let embedDelete = new Discord.MessageEmbed()
+        .setColor('#fc0303')
+        .setDescription(`Mensagem removida no canal [#${message.channel.name}]`)
+        .addField(`${message.author.tag} escreveu:`, message.cleanContent, true)
+        .addField('criada em:', message.createdAt.toLocaleString(), true)
+        .setFooter(date.toLocaleString() + ' - DiscordLogger');
 
-    return canal.send(`[<> CHAT] ${date.toLocaleString()} - [${oldMessage.channel}] ${oldMessage.author.tag} : ${oldMessage.cleanContent} > ${newMessage.cleanContent}`);
+    console.log(message);
+    return canal.send(embedDelete);
 });
 
 client.on('messageUpdate', (oldMessage, newMessage) => {
