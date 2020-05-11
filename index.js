@@ -1,25 +1,27 @@
-// require the discord.js module
+// Require do discord.js
 const Discord = require('discord.js');
 
-// create a new Discord client
+// Instância de cliente do Discord
 const client = new Discord.Client();
 
+// Importa os parâmetros de configuração do Bot
 const {prefix, token, channel} = require('./config.json');
 
+// Definição da variável que contém o canal onde as mensagens serão documentadas
 let canal;
 
-// when the client is ready, run this code
-// this event will only trigger one time after logging in
+// Inicializa o Bot, possibilitando a leitura dos eventos
 client.once('ready', () => {
-    console.log('Ready!');
+    console.log('Iniciado!');
     client.channels.fetch(channel).then((result) => {
         canal = result;
     });
 });
 
-// login to Discord with your app's token
+// Loga no discord usando o Token fornecido
 client.login(token);
 
+// Placeholders de comandos do guia do DiscordJS
 client.on('message', message => {
 
     if (!message.content.startsWith(prefix) || message.author.bot) return;
@@ -28,7 +30,6 @@ client.on('message', message => {
     const command = args.shift().toLowerCase();
 
     if (command === 'ping') {
-        // send back "Pong." to the channel the message was sent in
         message.channel.send('Pong.');
     } else if (command === 'server') {
         message.channel.send(`Server name: ${message.guild.name}\nTotal members: ${message.guild.memberCount}`);
@@ -40,14 +41,10 @@ client.on('message', message => {
         }
 
         message.channel.send(`Command name: ${command}\nArguments: ${args}`);
-    } else if (command === 'canal') {
-        console.log('Zip');
-        return client.channels.fetch(undefined, undefined);
     }
-
-
 });
 
+// Documenta qualquer mensagem enviada
 client.on('message', message => {
     if (message.author.bot) return;
 
@@ -56,6 +53,7 @@ client.on('message', message => {
     return canal.send(`[++ CHAT] ${date.toLocaleString()} - [${message.channel}] ${message.author.tag} : ${message.cleanContent}`);
 });
 
+// Placeholder de Widget
 client.on('message', message => {
     if (message.author.bot) return;
 
@@ -70,6 +68,7 @@ client.on('message', message => {
     return canal.send(embedAdd);
 });
 
+// Documenta as mensagens removidas
 client.on('messageDelete', message => {
     if (message.author.bot) return;
 
@@ -78,6 +77,7 @@ client.on('messageDelete', message => {
     return canal.send(`[-- CHAT] ${date.toLocaleString()} - [${message.channel}] ${message.author.tag} : ${message.cleanContent} | ${message.createdAt.toLocaleString()}`);
 });
 
+// Placeholder Widget
 client.on('messageDelete', message => {
     if (message.author.bot) return;
 
@@ -93,6 +93,7 @@ client.on('messageDelete', message => {
     return canal.send(embedDelete);
 });
 
+// Documenta as mensagens editadas
 client.on('messageUpdate', (oldMessage, newMessage) => {
     if (oldMessage.author.bot) return;
 
@@ -101,17 +102,41 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
     return canal.send(`[<> CHAT] ${date.toLocaleString()} - [${oldMessage.channel}] ${oldMessage.author.tag} : ${oldMessage.cleanContent} > ${newMessage.cleanContent}`);
 });
 
+// Documenta as conexões nas salas de voz e alternancia entre mute
 client.on('voiceStateUpdate', (oldState, newState) => {
     if (oldState.member.bot) return;
 
     let date = new Date();
+    let retorno;
 
     const oldChannel = oldState.channel;
     const newChannel = newState.channel;
 
+    // Troca de canal
     if (oldChannel && newChannel) {
-        return canal.send(`[<> VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: ${oldChannel} => ${newChannel}`);
+        // Microfone mutado
+        if (!Boolean(oldState.mute) && Boolean(newState.mute)) {
+            retorno = `[<> VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: [${newChannel}] mutou o microfone`;
+        // Microfone desmutado
+        } else if (Boolean(oldState.mute) && !Boolean(newState.mute)) {
+            retorno = `[<> VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: [${newChannel}] desmutou o microfone`;
+        // Áudio mutado
+        } else if (!Boolean(oldState.deaf) && Boolean(newState.deaf)) {
+            retorno = `[<> VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: [${newChannel}] mutou o áudio`;
+        // Áudio desmutado
+        } else if (Boolean(oldState.deaf) && !Boolean(newState.deaf)) {
+            retorno = `[<> VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: [${newChannel}] desmutou o áudio`;
+        // Troca entre salas
+        } else {
+            retorno = `[<> VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: ${oldChannel} => ${newChannel}`;
+        }
+    // Nova conexão a um canal
+    } else if (Boolean(newChannel)) {
+        retorno = `[++ VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: => ${newChannel}`;
+    // Saiu de um canal
+    } else if (!Boolean(newChannel)) {
+        retorno = `[-- VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: <= ${oldChannel}`;
     }
 
-    return canal.send(Boolean(newChannel) ? `[++ VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: => ${newChannel}` : `[-- VOICE] ${date.toLocaleString()} - ${oldState.member.user.tag}: <= ${oldChannel}`);
+    return canal.send(retorno);
 });
