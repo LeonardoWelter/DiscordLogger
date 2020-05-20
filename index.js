@@ -63,8 +63,12 @@ client.on('message', message => {
         .addField('Autor', message.author.tag, true)
         .addField('Canal', message.channel.name, true)
         .addField('Data de envio', date.toLocaleString(), true)
-        .addField('Mensagem', message.cleanContent)
+        .addField('Mensagem', message.cleanContent ? message.cleanContent : '\u200B')
         .setFooter(`Log gerado em: ${date.toLocaleString()} - DiscordLogger`);
+
+    if (message.attachments) {
+        embedAdd.setImage(message.attachments.filter(({ proxyURL }) => /\.(gif|jpe?g|png|webp)$/i.test(proxyURL)).map(({ proxyURL }) => proxyURL)[0]);
+    }
 
     console.log(`[MENSAGEM] ${date.toLocaleString()} - [${message.channel.name}] ${message.author.tag} enviou a 
                 mensagem: "${message.cleanContent}"`);
@@ -83,8 +87,12 @@ client.on('messageDelete', message => {
         .addField('Canal', message.channel.name, true)
         .addField('Data de envio', message.createdAt.toLocaleString(), true)
         .addField('Data da remoção', date.toLocaleString(), true)
-        .addField('Mensagem', message.cleanContent)
+        .addField('Mensagem', message.cleanContent ? message.cleanContent : '\u200B')
         .setFooter(`Log gerado em: ${date.toLocaleString()} - DiscordLogger`);
+
+    if (message.attachments) {
+        embedDelete.setImage(message.attachments.filter(({ proxyURL }) => /\.(gif|jpe?g|png|webp)$/i.test(proxyURL)).map(({ proxyURL }) => proxyURL)[0]);
+    }
 
     console.log(`[DELETE] ${date.toLocaleString()} - [${message.channel.name}] ${message.author.tag} removeu a mensagem:
                 "${message.cleanContent}" | criada em: ${message.createdAt.toLocaleString()}`);
@@ -103,9 +111,13 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
         .addField('Canal', oldMessage.channel.name, true)
         .addField('Data de envio', oldMessage.createdAt.toLocaleString(), true)
         .addField('Data da edição', date.toLocaleString(), true)
-        .addField('Mensagem original', oldMessage.cleanContent)
-        .addField('Mensagem editada', newMessage.cleanContent)
+        .addField('Mensagem original', oldMessage.cleanContent ? oldMessage.cleanContent : '\u200B')
+        .addField('Mensagem editada', newMessage.cleanContent ? newMessage.cleanContent : '\u200B')
         .setFooter(`Log gerado em: ${date.toLocaleString()} - DiscordLogger`);
+
+    if (newMessage.attachments) {
+        embedUpdate.setImage(newMessage.attachments.filter(({ proxyURL }) => /\.(gif|jpe?g|png|webp)$/i.test(proxyURL)).map(({ proxyURL }) => proxyURL)[0]);
+    }
 
     console.log(`[UPDATE] ${date.toLocaleString()} - [${oldMessage.channel.name}] ${oldMessage.author.tag} editou a mensagem: "${oldMessage.cleanContent}" para "${newMessage.cleanContent}"`);
     return canal.send(embedUpdate);
@@ -130,17 +142,27 @@ client.on('voiceStateUpdate', (oldState, newState) => {
             retorno = mensagemRetorno;
         // Microfone desmutado
         } else if (Boolean(oldState.mute) && !Boolean(newState.mute)) {
-            let mensagemRetorno = `[UNMUTE] ${date.toLocaleString()} - [${newChannel}] ${oldState.member.user.tag}: desmutou o microfone`;
+            let mensagemRetorno = `[UNMUTE] ${date.toLocaleString()} - [${newChannel.name}] ${oldState.member.user.tag}: desmutou o microfone`;
             console.log(mensagemRetorno);
             retorno = mensagemRetorno;
         // Áudio mutado
         } else if (!Boolean(oldState.deaf) && Boolean(newState.deaf)) {
-            let mensagemRetorno = `[DEAF] ${date.toLocaleString()} - [${newChannel}] ${oldState.member.user.tag}: mutou o áudio`;
+            let mensagemRetorno = `[DEAF] ${date.toLocaleString()} - [${newChannel.name}] ${oldState.member.user.tag}: mutou o áudio`;
             console.log(mensagemRetorno);
             retorno = mensagemRetorno;
         // Áudio desmutado
         } else if (Boolean(oldState.deaf) && !Boolean(newState.deaf)) {
-            let mensagemRetorno = `[UNDEAF] ${date.toLocaleString()} - [${newChannel}] ${oldState.member.user.tag}: desmutou o áudio`;
+            let mensagemRetorno = `[UNDEAF] ${date.toLocaleString()} - [${newChannel.name}] ${oldState.member.user.tag}: desmutou o áudio`;
+            console.log(mensagemRetorno);
+            retorno = mensagemRetorno;
+        // Iniciou uma stream
+        } else if(!Boolean(oldState.streaming) && Boolean(newState.streaming)) {
+            let mensagemRetorno = `[STREAMON] ${date.toLocaleString()} - [${newChannel.name}] ${oldState.member.user.tag}: iniciou uma stream`;
+            console.log(mensagemRetorno);
+            retorno = mensagemRetorno;
+        // Encerrou uma stream
+        } else if (Boolean(oldState.streaming) && Boolean(newState.streaming)) {
+            let mensagemRetorno = `[STREAMOFF] ${date.toLocaleString()} - [${newChannel.name}] ${oldState.member.user.tag}: encerrou uma stream`;
             console.log(mensagemRetorno);
             retorno = mensagemRetorno;
         // Troca entre salas
@@ -154,7 +176,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
                 .addField('Canal novo', newChannel, true)
                 .setFooter(`Log gerado em: ${date.toLocaleString()} - DiscordLogger`);
 
-            console.log(`[CHANGE] ${date.toLocaleString()} - ${oldState.member.user.tag} trocou de canal: [${oldChannel}] para [${newChannel}]`);
+            console.log(`[CHANGE] ${date.toLocaleString()} - ${oldState.member.user.tag} trocou de canal: [${oldChannel.name}] para [${newChannel.name}]`);
             retorno = embedChange;
         }
     // Nova conexão a um canal
@@ -167,7 +189,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
             .addField('Canal', newChannel)
             .setFooter(`Log gerado em: ${date.toLocaleString()} - DiscordLogger`);
 
-        console.log(`[CONNECT] ${date.toLocaleString()} - ${oldState.member.user.tag} entrou no canal: [${newChannel}]`);
+        console.log(`[CONNECT] ${date.toLocaleString()} - ${oldState.member.user.tag} entrou no canal: [${newChannel.name}]`);
         retorno = embedConnect;
     // Saiu de um canal
     } else if (!Boolean(newChannel)) {
@@ -179,7 +201,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
             .addField('Canal antigo', oldChannel)
             .setFooter(`Log gerado em: ${date.toLocaleString()} - DiscordLogger`);
 
-        console.log(`[DISCONNECT] ${date.toLocaleString()} - ${oldState.member.user.tag} saiu do canal: [${oldChannel}]`);
+        console.log(`[DISCONNECT] ${date.toLocaleString()} - ${oldState.member.user.tag} saiu do canal: [${oldChannel.name}]`);
         retorno = embedDisconnect;
     }
 
