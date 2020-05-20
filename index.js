@@ -136,7 +136,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
         // Áudio mutado
         } else if (!Boolean(oldState.deaf) && Boolean(newState.deaf)) {
             let mensagemRetorno = `[DEAF] ${date.toLocaleString()} - [${newChannel}] ${oldState.member.user.tag}: mutou o áudio`;
-            console.log(mensagemRetorno)
+            console.log(mensagemRetorno);
             retorno = mensagemRetorno;
         // Áudio desmutado
         } else if (Boolean(oldState.deaf) && !Boolean(newState.deaf)) {
