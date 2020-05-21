@@ -161,7 +161,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
             console.log(mensagemRetorno);
             retorno = mensagemRetorno;
         // Encerrou uma stream
-        } else if (Boolean(oldState.streaming) && Boolean(newState.streaming)) {
+        } else if (Boolean(oldState.streaming) && !Boolean(newState.streaming)) {
             let mensagemRetorno = `[STREAMOFF] ${date.toLocaleString()} - [${newChannel.name}] ${oldState.member.user.tag}: encerrou uma stream`;
             console.log(mensagemRetorno);
             retorno = mensagemRetorno;
